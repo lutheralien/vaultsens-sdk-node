@@ -27,6 +27,12 @@ jobs:
       - name: Build
         run: yarn build
 
+      - name: Clear npm auth
+        run: |
+          rm -f ~/.npmrc
+          rm -f .npmrc
+          npm config delete //registry.npmjs.org/:_authToken || true
+
       - name: Publish
         env:
           NPM_CONFIG_PROVENANCE: "true"

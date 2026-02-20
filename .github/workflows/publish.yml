@@ -28,4 +28,6 @@ jobs:
         run: yarn build
 
       - name: Publish
-        run: npm publish --access public
+        env:
+          NPM_CONFIG_PROVENANCE: "true"
+        run: npm publish --provenance --access public

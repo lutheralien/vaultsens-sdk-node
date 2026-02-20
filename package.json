@@ -1,6 +1,6 @@
 {
   "name": "@vaultsens/sdk",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "VaultSens SDK for API key uploads and file management",
   "type": "module",
   "main": "./dist/index.cjs",

@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: write
-  id-token: write
 
 jobs:
   publish:
@@ -54,18 +53,7 @@ jobs:
       - name: Build
         run: yarn build
 
-      - name: Debug OIDC
-        run: |
-          echo "OIDC URL: $ACTIONS_ID_TOKEN_REQUEST_URL"
-          echo "OIDC token present: ${ACTIONS_ID_TOKEN_REQUEST_TOKEN:+yes}"
-
-      - name: Clear npm auth
-        run: |
-          rm -f ~/.npmrc
-          rm -f .npmrc
-          npm config delete //registry.npmjs.org/:_authToken || true
-
       - name: Publish
         env:
-          NPM_CONFIG_PROVENANCE: "true"
-        run: npm publish --provenance --access public
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public

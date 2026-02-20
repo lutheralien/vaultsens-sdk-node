@@ -67,18 +67,27 @@ Upload a single file.
 
 ```ts
 const result = await client.uploadFile(blob, {
-  name: 'my-image',          // optional display name
-  filename: 'photo.png',     // optional filename hint
-  compression: 'medium',     // 'none' | 'low' | 'medium' | 'high'
-  folderId: 'folder-id',     // optional folder to place the file in
+  name: 'my-image',        // optional display name stored with the file
+  filename: 'photo.png',   // filename sent to the server (used for MIME detection)
+  compression: 'medium',   // compression level applied server-side
+  folderId: 'folder-id',   // place the file inside this folder
 });
 // result.data._id  — file ID
 // result.data.url  — public URL
 ```
 
+**Upload options**
+
+| Option | Type | Description |
+|---|---|---|
+| `name` | `string?` | Display name stored with the file |
+| `filename` | `string?` | Filename hint sent to the server (used for MIME type detection) |
+| `compression` | `CompressionLevel?` | Server-side compression: `'none'` \| `'low'` \| `'medium'` \| `'high'`. Must be allowed by your plan |
+| `folderId` | `string?` | ID of the folder to place the file in. Omit for root |
+
 #### `uploadFiles(files, options?)`
 
-Upload multiple files in one request.
+Upload multiple files in one request. Accepts the same options as `uploadFile`.
 
 ```ts
 const result = await client.uploadFiles(
@@ -108,7 +117,7 @@ const meta = await client.getFileMetadata('file-id');
 
 #### `updateFile(fileId, file, options?)`
 
-Replace a file's content. Accepts the same options as `uploadFile` except `folderId`.
+Replace a file's content. Accepts `name`, `filename`, and `compression` — same as `uploadFile` but `folderId` is not supported (the file stays in its current folder).
 
 ```ts
 await client.updateFile('file-id', newBlob, { compression: 'high' });
@@ -122,7 +131,7 @@ await client.deleteFile('file-id');
 
 #### `buildFileUrl(fileId, options?)`
 
-Build a URL for dynamic image transforms (served by the API).
+Build a URL for dynamic image transforms (served by the API). No network request is made.
 
 ```ts
 const url = client.buildFileUrl('file-id', {
@@ -132,6 +141,15 @@ const url = client.buildFileUrl('file-id', {
   quality: 80,
 });
 ```
+
+**Transform options**
+
+| Option | Type | Description |
+|---|---|---|
+| `width` | `number?` | Output width in pixels |
+| `height` | `number?` | Output height in pixels (fit: inside, aspect ratio preserved) |
+| `format` | `string?` | Output format e.g. `'webp'`, `'jpeg'`, `'png'` |
+| `quality` | `number \| string?` | Compression quality `1–100` |
 
 ---
 

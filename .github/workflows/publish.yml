@@ -27,6 +27,11 @@ jobs:
       - name: Build
         run: yarn build
 
+      - name: Debug OIDC
+        run: |
+          echo "OIDC URL: $ACTIONS_ID_TOKEN_REQUEST_URL"
+          echo "OIDC token present: ${ACTIONS_ID_TOKEN_REQUEST_TOKEN:+yes}"
+
       - name: Clear npm auth
         run: |
           rm -f ~/.npmrc

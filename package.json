@@ -1,0 +1,44 @@
+{
+  "name": "@vaultsens/sdk",
+  "version": "0.1.1",
+  "description": "VaultSens SDK for API key uploads and file management",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "vaultsens",
+    "sdk",
+    "storage",
+    "upload"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lutheralien/vaultsens-sdk-node.git"
+  },
+  "homepage": "https://vaultsens.com/",
+  "bugs": {
+    "url": "https://github.com/lutheralien/vaultsens-sdk-node/issues"
+  },
+  "author": "VaultSens",
+  "license": "MIT",
+  "devDependencies": {
+    "tsup": "^8.1.0",
+    "typescript": "^5.9.2"
+  }
+}

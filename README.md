@@ -49,12 +49,13 @@ x-api-secret: <apiSecret>
 | Option | Type | Default | Description |
 |---|---|---|---|
 | `baseUrl` | `string` | — | Your VaultSens API base URL |
-| `apiKey` | `string` | — | API key |
-| `apiSecret` | `string` | — | API secret |
-| `timeoutMs` | `number` | `30000` | Request timeout in ms |
+| `apiKey` | `string?` | — | API key |
+| `apiSecret` | `string?` | — | API secret |
+| `timeoutMs` | `number?` | `30000` | Request timeout in ms |
+| `fetchImpl` | `FetchLike?` | `globalThis.fetch` | Custom fetch implementation |
 | `retry.retries` | `number` | `2` | Number of retry attempts |
-| `retry.retryDelayMs` | `number` | `400` | Delay between retries in ms |
-| `retry.retryOn` | `number[]` | `[429,500,502,503,504]` | Status codes to retry on |
+| `retry.retryDelayMs` | `number?` | `400` | Delay between retries in ms |
+| `retry.retryOn` | `number[]?` | `[429,500,502,503,504]` | Status codes to retry on |
 
 ---
 

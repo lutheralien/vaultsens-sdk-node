@@ -1,13 +1,12 @@
 name: Publish
 
 on:
-  workflow_call:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:
@@ -15,14 +14,42 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: "https://registry.npmjs.org"
 
+      - name: Skip if version bump commit
+        run: |
+          MSG=$(git log -1 --pretty=%B)
+          if echo "$MSG" | grep -q "chore: bump version"; then
+            echo "Version bump commit detected, skipping."
+            exit 0
+          fi
+
       - name: Install deps
         run: yarn install --frozen-lockfile
+
+      - name: Bump patch version
+        run: npm version patch --no-git-tag-version
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          VERSION=$(node -p "require('./package.json').version")
+          git add package.json
+          git commit -m "chore: bump version to v$VERSION"
+
+      - name: Tag and push
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          git tag "v$VERSION"
+          git push origin main
+          git push origin "v$VERSION"
 
       - name: Build
         run: yarn build

@@ -196,7 +196,8 @@ export class VaultSensClient {
 
   async uploadFile(file: Blob, options: UploadOptions = {}): Promise<ApiSuccess<FileRecord>> {
     const form = new FormData();
-    form.append('file', file, options.filename || 'file');
+    const name = options.filename || (file instanceof File ? file.name : '') || 'file';
+    form.append('file', file, name);
     if (options.name) {
       form.append('name', options.name);
     }
@@ -274,7 +275,8 @@ export class VaultSensClient {
 
   async updateFile(fileId: string, file: Blob, options: UploadOptions = {}): Promise<ApiSuccess<FileRecord>> {
     const form = new FormData();
-    form.append('file', file, options.filename || 'file');
+    const name = options.filename || (file instanceof File ? file.name : '') || 'file';
+    form.append('file', file, name);
     if (options.name) {
       form.append('name', options.name);
     }
@@ -394,9 +396,9 @@ const toArrayBuffer = (buffer: ArrayBuffer | Uint8Array) => {
 
 export const fileFromBuffer = (
   buffer: ArrayBuffer | Uint8Array,
-  _filename: string,
+  filename: string,
   type = 'application/octet-stream'
 ) => {
   const data = toArrayBuffer(buffer);
-  return new Blob([data], { type });
+  return new File([data], filename, { type });
 };

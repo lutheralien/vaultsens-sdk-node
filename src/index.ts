@@ -77,6 +77,7 @@ export type TransformOptions = {
   height?: number;
   format?: string;
   quality?: number | string;
+  fit?: 'inside' | 'cover' | 'contain' | 'fill' | 'outside';
 };
 
 /**
@@ -305,6 +306,7 @@ export class VaultSensClient {
     if (options.height) url.searchParams.set('height', String(options.height));
     if (options.format) url.searchParams.set('format', options.format);
     if (options.quality !== undefined) url.searchParams.set('quality', String(options.quality));
+    if (options.fit) url.searchParams.set('fit', options.fit);
     return url.toString();
   }
 

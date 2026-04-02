@@ -69,6 +69,7 @@ export type UploadOptions = {
   name?: string;
   compression?: CompressionLevel;
   filename?: string;
+  mimeType?: string;
   folderId?: string;
 };
 
@@ -197,7 +198,7 @@ export class VaultSensClient {
   async uploadFile(file: Blob, options: UploadOptions = {}): Promise<ApiSuccess<FileRecord>> {
     const form = new FormData();
     const name = options.filename || (file instanceof File ? file.name : '') || 'file';
-    form.append('file', file, name);
+    form.append('file', normalizeUploadBlob(file, name, options.mimeType), name);
     if (options.name) {
       form.append('name', options.name);
     }
@@ -215,12 +216,13 @@ export class VaultSensClient {
   }
 
   async uploadFiles(
-    files: Array<{ file: Blob; filename?: string }>,
+    files: Array<{ file: Blob; filename?: string; mimeType?: string }>,
     options: UploadOptions = {}
   ): Promise<ApiSuccess<FileRecord[]>> {
     const form = new FormData();
     files.forEach((item) => {
-      form.append('files', item.file, item.filename || 'file');
+      const filename = item.filename || (item.file instanceof File ? item.file.name : '') || 'file';
+      form.append('files', normalizeUploadBlob(item.file, filename, item.mimeType), filename);
     });
     if (options.name) {
       form.append('name', options.name);
@@ -239,7 +241,8 @@ export class VaultSensClient {
   }
 
   async listFiles(folderId?: string): Promise<ApiSuccess<FileRecord[]>> {
-    const path = folderId ? `/api/v1/files?folderId=${encodeURIComponent(folderId)}` : '/api/v1/files';
+    const param = folderId ?? 'all';
+    const path = `/api/v1/files?folderId=${encodeURIComponent(param)}`;
     return this.request<ApiSuccess<FileRecord[]>>(path, { method: 'GET' });
   }
 
@@ -276,7 +279,7 @@ export class VaultSensClient {
   async updateFile(fileId: string, file: Blob, options: UploadOptions = {}): Promise<ApiSuccess<FileRecord>> {
     const form = new FormData();
     const name = options.filename || (file instanceof File ? file.name : '') || 'file';
-    form.append('file', file, name);
+    form.append('file', normalizeUploadBlob(file, name, options.mimeType), name);
     if (options.name) {
       form.append('name', options.name);
     }
@@ -394,11 +397,58 @@ const toArrayBuffer = (buffer: ArrayBuffer | Uint8Array) => {
   return buffer;
 };
 
+const EXTENSION_MIME_TYPES: Record<string, string> = {
+  csv: 'text/csv',
+  doc: 'application/msword',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  json: 'application/json',
+  pdf: 'application/pdf',
+  png: 'image/png',
+  ppt: 'application/vnd.ms-powerpoint',
+  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  txt: 'text/plain',
+  xls: 'application/vnd.ms-excel',
+  xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  xml: 'application/xml',
+  zip: 'application/zip',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  webp: 'image/webp',
+};
+
+const inferMimeTypeFromFilename = (filename: string) => {
+  const extension = filename.split('.').pop()?.toLowerCase() || '';
+  return EXTENSION_MIME_TYPES[extension];
+};
+
+const resolveUploadMimeType = (file: Blob, filename: string, type?: string) => {
+  if (type) {
+    return type;
+  }
+  if (file.type) {
+    return file.type;
+  }
+  return inferMimeTypeFromFilename(filename) || 'application/octet-stream';
+};
+
+const normalizeUploadBlob = (file: Blob, filename: string, type?: string) => {
+  const resolvedType = resolveUploadMimeType(file, filename, type);
+  if (file instanceof File && file.name === filename && file.type === resolvedType) {
+    return file;
+  }
+  if (!(file instanceof File) && file.type === resolvedType) {
+    return file;
+  }
+  return new File([file], filename, { type: resolvedType });
+};
+
 export const fileFromBuffer = (
   buffer: ArrayBuffer | Uint8Array,
   filename: string,
-  type = 'application/octet-stream'
+  type?: string
 ) => {
   const data = toArrayBuffer(buffer);
-  return new File([data], filename, { type });
+  return new File([data], filename, {
+    type: type || inferMimeTypeFromFilename(filename) || 'application/octet-stream',
+  });
 };

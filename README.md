@@ -27,7 +27,7 @@ console.log(result.data._id, result.data.url);
 // Upload from a Buffer (Node.js)
 import { readFile } from 'node:fs/promises';
 const buffer = await readFile('./photo.png');
-const blob = fileFromBuffer(buffer, 'photo.png', 'image/png');
+const blob = fileFromBuffer(buffer, 'photo.png');
 const result = await client.uploadFile(blob, { filename: 'photo.png' });
 ```
 
@@ -82,6 +82,7 @@ const result = await client.uploadFile(blob, {
 |---|---|---|
 | `name` | `string?` | Display name stored with the file |
 | `filename` | `string?` | Filename hint sent to the server (used for MIME type detection) |
+| `mimeType` | `string?` | Explicit MIME type override. If omitted, the SDK uses the blob's type or infers from `filename` |
 | `compression` | `CompressionLevel?` | Server-side compression: `'none'` \| `'low'` \| `'medium'` \| `'high'`. Must be allowed by your plan |
 | `folderId` | `string?` | ID of the folder to place the file in. Omit for root |
 
@@ -92,7 +93,7 @@ Upload multiple files in one request. Accepts the same options as `uploadFile`.
 ```ts
 const result = await client.uploadFiles(
   [
-    { file: blob1, filename: 'a.png' },
+    { file: blob1, filename: 'a.png', mimeType: 'image/png' },
     { file: blob2, filename: 'b.jpg' },
   ],
   { compression: 'low', folderId: 'folder-id' }
@@ -117,7 +118,7 @@ const meta = await client.getFileMetadata('file-id');
 
 #### `updateFile(fileId, file, options?)`
 
-Replace a file's content. Accepts `name`, `filename`, and `compression` — same as `uploadFile` but `folderId` is not supported (the file stays in its current folder).
+Replace a file's content. Accepts `name`, `filename`, `mimeType`, and `compression` — same as `uploadFile` but `folderId` is not supported (the file stays in its current folder).
 
 ```ts
 await client.updateFile('file-id', newBlob, { compression: 'high' });
